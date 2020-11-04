@@ -15,11 +15,15 @@ p.text_warn {
 }
 
 p.text_success {
-    color: green;
+    color: #ffffff;
 }
 
 p.text_special {
-    color: purple;
+    color: #ff2fff;
+}
+
+p.text_mana {
+    color: #358EFF;
 }
 
 .main {
@@ -182,13 +186,14 @@ p.text_special {
 }
 
 .panel_item {
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    width: 150px;
-    height: 50px;
+    width: 170px;
+    height: 60px;
     border: 3px solid black;
     border-radius: 15px;
     background-color: rgba(107, 107, 107, 0.2);
+    cursor: default;
     transition: .3s;
 }
 
@@ -200,9 +205,163 @@ p.text_special {
     background-color: rgba(107, 107, 107, .6);
 }
 
+
+.panel_item p {
+    transition: 1s;
+}
+
+.panel_item:not(.active) {
+    filter: grayscale(100%);
+}
+
+.panel_item.healUnits.splash {
+    border-color: #fcf8b7;
+}
+
+.panel_item.curseUnits.splash {
+    box-shadow: 0 0 5px 1px #04b6cd;
+}
+
+.panel_item.damageUnits.splash {
+    box-shadow: 0 0 5px 1px #CF4D11;
+}
+
+.panel_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: calc(100% - 25px);
+    /* margin-bottom: 5px; */
+    /* margin-left: 25px; */
+    padding-left: 25px;
+    filter: grayscale(0%);
+    background: no-repeat left top/contain;
+    transition: 1s;
+}
+
+
+
+.panel_item.healUnits .panel_title {
+    background-image: url("img/holy-star.svg");
+}
+
+.panel_item.healUnits .panel_title p {
+    color: #fcf8b7;
+}
+
+.panel_item.curseUnits .panel_title {
+    background-position: left -1px;
+    background-image: url("img/snowflake.svg");
+}
+
+.panel_item.curseUnits .panel_title p {
+    color: #04b6cd;
+}
+
+.panel_item.damageUnits .panel_title {
+    background-position: 2px -1px;
+    background-image: url("img/meteor.svg");
+}
+
+.panel_item.damageUnits .panel_title p {
+    color: #CF4D11;
+}
+
+.panel_description {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.panel_hint {
+    width: calc(32% - 20px);
+    text-align: left;
+    padding-left: 20px;
+    background: no-repeat left 0/20px 17px;
+}
+
+.panel_hint p {
+    font-size: 14px;
+}
+
+.panel_hint.cost {
+    width: calc(45% - 20px);
+    background-image: url("img/mana.svg");
+}
+
+.panel_hint.time {
+    background-image: url("img/stopclock.svg");
+}
+
+.panel_hint.cooldown {
+    background-image: url("img/sandglass.svg");
+}
+
+.panel_cast_bar {
+    display: flex;
+    align-items: flex-end;
+    width: calc(100% - 50px);
+    height: 30px;
+    padding-left: 30px;
+    margin: 20px 0 10px;
+    background: no-repeat left center/25px;
+    background-image: url("img/meteor.svg");
+    opacity: 0;
+    visibility: hidden;
+    transition: .2s;
+}
+
+.panel_cast_bar.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.panel_cast_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 20px;
+    border: 3px solid black;
+    border-radius: 15px;
+    background-color: rgba(107, 107, 107, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel_cast_container p {
+    margin-top: 1px;
+    z-index: 10;
+}
+.panel_cast_container p,
+.panel_cast_container span {
+    font-size: 12px;
+
+}
+
+.panel_cast_transparent {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    /* border-radius: 15px; */
+    background: #666;
+}
+
 .block_unit {
     border-radius: 10px;
+    position: relative;
     transform: translate3d(0, 0, 0);
+}
+
+.block_unit p.notification {
+    /*color: #c8c8c8;*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
 }
 
 .block_unit .unit_avatar {
@@ -280,19 +439,13 @@ p.text_special {
 }
 
 
-.block_unit p,
-.block_unit span {
+.block_unit > div p,
+.block_unit > div span {
     color: black;
     transition: 1s;
 }
 
-.panel_item p {
-    transition: 1s;
-}
 
-.panel_item:not(.active) p {
-    color: #666;
-}
 
 .unit_description p,
 .unit_description span {
@@ -304,8 +457,8 @@ p.text_special {
 
 }
 
-.block_unit.black p,
-.block_unit.black span {
+.block_unit.black > div p,
+.block_unit.black > div span {
     text-shadow: 0 0 10px #fff, 0 0 10px #fff, 0 0 10px #fff;
 
 }
@@ -316,8 +469,8 @@ p.text_special {
     /*box-shadow: 0 0 5px 1px green, 0 0 5px 1px green inset;*/
 
 }
-.block_unit.fine p,
-.block_unit.fine span {
+.block_unit.fine > div p,
+.block_unit.fine > div span {
     color: #0ab50a;
 }
 
@@ -328,8 +481,8 @@ p.text_special {
     /*background: rgba(0, 128, 0, .2);*/
 
 }
-.block_unit.hurt p,
-.block_unit.hurt span {
+.block_unit.hurt > div p,
+.block_unit.hurt > div span {
     color: rgb(113, 188, 8);
 }
 
@@ -338,12 +491,10 @@ p.text_special {
     border-color: rgb(164, 164, 6);
     /*background: rgba(164, 164, 6, .2);*/
 }
-.block_unit.caution p,
-.block_unit.caution span {
+.block_unit.caution > div p,
+.block_unit.caution > div span {
     color: rgb(212, 212, 20);
 }
-
-
 
 
 .block_unit.cursed {
@@ -353,17 +504,17 @@ p.text_special {
     box-shadow: 0 0 5px 1px #029AAE, 0 0 5px 1px #029AAE inset;
 }
 
-.block_unit.cursed p,
-.block_unit.cursed span {
+.block_unit.cursed > div p,
+.block_unit.cursed > div span {
     /*color: #c082ff;*/
 }
 
 .block_unit.damaging {
-    border-color: rgb(207, 77, 17);
+    /*border-color: rgb(207, 77, 17);*/
     background: rgba(164, 56, 6, .2);
 }
-.block_unit.damaging p,
-.block_unit.damaging span {
+.block_unit.damaging > div p,
+.block_unit.damaging > div span {
     /*color: rgb(207, 77, 17);*/
 }
 
@@ -379,8 +530,8 @@ p.text_special {
     background: rgba(255,255,255, .5);
 }
 
-.block_unit.healed p,
-.block_unit.healed span {
+.block_unit.healed > div p,
+.block_unit.healed > div span {
     color: #fcf8b7;
 }
 
@@ -398,8 +549,8 @@ p.text_special {
     animation: dangerBlinks .5s infinite;
 
 }
-.block_unit.danger p,
-.block_unit.danger span {
+.block_unit.danger > div p,
+.block_unit.danger > div span {
     color: rgb(207, 77, 17);
 }
 
@@ -408,8 +559,8 @@ p.text_special {
     border-color: rgb(176, 15, 15);
     /*background: rgba(145, 13, 13, .2);*/
 }
-.block_unit.death p,
-.block_unit.death span {
+.block_unit.death > div p,
+.block_unit.death > div span {
     color: rgb(176, 15, 15);
 }
 

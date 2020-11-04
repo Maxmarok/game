@@ -3,10 +3,15 @@ window.onload = function(){
     class Player {
         constructor() {
             this.state = {
-                name: 'Manastorm',
-                level: 5,
-                mana: 100,
-                hp: 100
+                name: 'Манашторм',
+                level: 2,
+
+                MP: 200,
+                maxMP: 200,
+
+                HP: 100,
+                maxHP: 100,
+                MP5: 10,
             };
         }
 
@@ -15,22 +20,34 @@ window.onload = function(){
         }
 
         title() {
-            return this.state.name + ' lvl ' + this.state.level;
+            return this.state.name  + ' ' + this.state.level + ' ур.';
         }
 
-        mana() {
-            return this.state.mana;
+        currMP() {
+            return this.state.MP;
+        }
+
+        maxMP() {
+            return this.state.maxMP;
+        }
+
+        HP() {
+            return this.state.hp;
         }
 
         maxHP() {
-            return this.state.hp;
+            return this.state.maxHP;
+        }
+
+        regenMP() {
+            return this.state.MP5;
         }
     }
 
     class Dragon {
         constructor() {
             this.state = {
-                name: 'Dragon',
+                name: 'Дракон',
                 level: 5,
                 mana: 100,
                 hp: 1000,
@@ -46,10 +63,39 @@ window.onload = function(){
         constructor() {
             this.state = {
                 list: [
-                    ['healUnits', 'Heal 20-50', '20-50', 'player'],
-                    ['curseUnits', 'Freeze 5-10', '5-10', 'enemy'],
-                    ['damageUnits', 'Damage 10-30', '10-30', 'enemy'],
-                    //['resurrectUnits', 'Resurrection', 50, 'player'],
+                    {
+                        name: 'healUnits',
+                        title: 'Лечение',
+                        level: 1,
+                        value: '20-50',
+                        castOn: 'player',
+                        manaCost: 10,
+                        castTime: 2000,
+                        coolDown: 5000,
+                    },
+
+                    {
+                        name: 'curseUnits',
+                        title: 'Заморозка.',
+                        level: 2,
+                        value: '5-10',
+                        castOn: 'enemy',
+                        manaCost: 20,
+                        castTime: 1000,
+                        coolDown: 10000,
+                        duration: 5000,
+                    },
+
+                    {
+                        name: 'damageUnits',
+                        title: 'Метеор',
+                        level: 1,
+                        value: '10-30',
+                        castOn: 'enemy',
+                        manaCost: 10,
+                        castTime: 2000,
+                        coolDown: 5000,
+                    },
                 ]
             }
         }
@@ -59,10 +105,9 @@ window.onload = function(){
         }
     }
 
-    let spellBookList = new SpellBook;
+    let playerSpells = new SpellBook;
     let dragon = new Dragon;
     let player = new Player;
-    player.state.level = 1;
 
     setCookie('user_level', player.state.level);
 
@@ -83,19 +128,33 @@ window.onload = function(){
 
     document.getElementById('main').prepend(mainBanner);
 
-    getUserInfo(player.title(), player.mana());
-    getEnemyInfo();
+    getUserInfo(player);
+
+    let playerCurrMP = document.querySelector('.hero_mana span');
 
     setTimeout(() => {
         mainBanner.classList.remove('ready')
         mainBanner.classList.add('go');
-        mainBannerText.innerText = 'Fight!';
+        mainBannerText.innerText = 'Сражение началось!';
 
         document.getElementById('main').classList.add('fight');
 
         initiateAutoAttack('player', 'enemy');
         initiateAutoAttack('enemy', 'player');
     }, 1000);
+
+    setTimeout(function regenMP() {
+        let newMP = player.currMP() + player.regenMP();
+        let maxMP = player.maxMP();
+
+        newMP = newMP > maxMP ? maxMP : newMP;
+        playerCurrMP.innerText = newMP > maxMP ? maxMP : newMP;
+        player.state.MP = newMP;
+
+        if(player.currMP() < player.maxMP()) {
+            setTimeout(regenMP, 5000);
+        }
+    }, 5000);
 
 
     function initiateAutoAttack(attacker, defender) {
@@ -160,39 +219,42 @@ window.onload = function(){
                     }
 
                     enemy.innerText = enemyHP;
-                    enemyUnit.className = 'block_unit ' + getHPState(enemyHP, maxHP) + getEnemyCursedState(enemyUnit);
+                    getHPState(enemyUnit, enemyHP, maxHP);
 
                     if (attackValue > 0) getStatus['damaging'](enemyUnit);
-
                     getStatus['attacking'](armyUnit);
 
                     //console.log(armyUnit.getAttribute('name') + ' is attack for '+attackValue+ ' damage');
-                    let attackLog = document.createElement('p');
-                    attackLog.className = unitSide === 'player' ? 'text_warn' : 'text_danger';
-                    attackLog.innerHTML = unitName + ' is attack for '+attackValue+ ' damage';
+                    let notification = document.createElement('p');
+                    notification.className = unitSide === 'player' ? 'text_warn' : 'text_danger';
+                    notification.classList.add('notification');
+                    notification.innerHTML = enemyHP === 'died' ? 'Cмерть' :  '-'+attackValue;
 
-                    mainLogsContent.append(attackLog);
-
-                    scrollToBottom(mainLogs);
-
-
-                    if( enemyHP === 'died') {
-                        let deathLog = document.createElement('p');
-                        deathLog.innerHTML = enemyName + ' is defeated!';
-                        mainLogsContent.append(deathLog);
-                        scrollToBottom(mainLogs);
-                    }
+                    enemyUnit.append(notification);
+                    setNotification(notification);
                 }
             }, speed);
-
-
         }
     }
 
+    function setNotification(block) {
+        let randomEnd = getRandomArbitrary(-30,60)+'px';
+        let randomStart = getRandomArbitrary(0,60)+'px';
+
+        block.animate([
+            { transform: 'translate('+randomStart+', -10px) scale(2)', opacity: '1' },
+            { transform: 'translate('+randomEnd+', -50px) scale(1)', opacity: '.5' }
+        ], {
+            duration: 2000
+        });
+
+        setTimeout(() => {
+            block.remove();
+        }, 2000);
+    }
+
     function scrollToBottom(el) {
-
             el.scrollTop = el.scrollHeight;
-
     }
 
     function getUnits(type) {
@@ -248,31 +310,74 @@ window.onload = function(){
         },
     }
 
+    function getSpellTitle(title, level) {
+        return title + ' ' + level + ' ур.';
+    }
+
     function panelItems(items, block) {
+
         items.map(data => {
+
+            let spellInfo = data;
+
             let item = document.createElement('div');
-            item.className = 'panel_item active';
-            item.addEventListener('click', () => applySpell(data, item));
+            item.className = 'panel_item active ' + spellInfo.name;
+            item.addEventListener('click', () => applySpell(spellInfo, item));
 
             let title = document.createElement('div');
             title.className = 'panel_title';
-            title.innerHTML = '<p>' + data[1] + '</p>';
+            title.innerHTML = '<p>' + getSpellTitle(spellInfo.title, spellInfo.level) + '</p>';
+
+            let desc = document.createElement('div');
+            desc.className = 'panel_description';
+
+            let cost = document.createElement('div');
+            cost.className = 'panel_hint cost';
+            cost.innerHTML = '<p class="text_mana">' + spellInfo.manaCost + ' М</p>';
+
+            let time = document.createElement('div');
+            time.className = 'panel_hint time';
+            time.innerHTML = '<p>' + spellInfo.castTime / 1000 + 's</p>';
+
+            let coolDown = document.createElement('div');
+            coolDown.className = 'panel_hint cooldown';
+            coolDown.innerHTML = '<p>' + spellInfo.coolDown / 1000 + 's</p>';
+
+            desc.append(cost);
+            desc.append(time);
+            desc.append(coolDown);
 
             item.append(title);
+            item.append(desc);
             block.append(item);
         });
     }
 
 
     function applySpell(spell, block, type) {
-        let spellName = spell[1];
+        let spellName = spell.name;
+        let castBar = document.querySelector('.panel_cast_bar');
 
         if(block.classList.contains('active')) {
-            //alert('Casting spell: ' + spellName);
-            spellBook[spell[0]](spell, block);
+            if(castBar.classList.contains('active')) {
+                console.log('cd');
+            } else {
+                startPlayerCast(spell, block);
+            }
         } else {
-            alert('Spell ' +spellName+ ' isn\'t ready yet');
+            alert('Spell ' +spell.title+ ' isn\'t ready yet');
         }
+    }
+
+    function startPlayerCast(spell, panel) {
+        let castBar = document.querySelector('.panel_cast_bar');
+        castBar.classList.add('active');
+
+        setTimeout(() => {
+            panel.classList.remove('active'); //set coolDown
+            castBar.classList.remove('active');
+            spellBook[spell.name](spell, panel); //apply spell
+        }, spell.castTime);
     }
 
     let spellBook = {
@@ -291,14 +396,19 @@ window.onload = function(){
     }
 
     function curseUnits(data, panel) {
-        let spellName = data[1];
-        let spellValue = data[2];
-        let type = data[3];
+        let spellName = data.name;
+        let spellValue = data.value;
+        let spellCoolDown = data.coolDown;
+        let type = data.castOn;
         let army = document.querySelector('.main_block.'+type).querySelector('.block_line.army');
         let lines = army.querySelectorAll('.block_unit');
         let deadUnits = army.querySelectorAll('.block_unit.death');
+        let spellCost = data.manaCost;
+        let playerMP = player.currMP();
 
-        if(data[0] === 'curseUnits' && deadUnits.length === lines.length) return alert('All units are already dead');
+        if(spellName === 'curseUnits' && deadUnits.length === lines.length)  {
+            return alert('All units are already dead');
+        }
 
         for(let line of lines) {
             let value = parseInt(spellValue);
@@ -313,7 +423,7 @@ window.onload = function(){
 
             let unitHP = unitText;
 
-            if (data[0] === 'curseUnits' && unitText !== 'died') {
+            if (spellName === 'curseUnits' && unitText !== 'died') {
 
                 if (checkCurseResist(line)) {
                     getStatus['resisted'](line);
@@ -322,7 +432,6 @@ window.onload = function(){
 
                     let maxHP = line.getAttribute('side') === 'player' ? player.maxHP() : dragon.maxHP();
 
-
                     // Dot
                     setTimeout(function run() {
                         let lossHP = parseInt(unit.innerText) - value;
@@ -330,19 +439,35 @@ window.onload = function(){
 
                         unitHP = getHPValue(lossHP, maxHP);
                         unit.innerText = unitHP;
-                        line.className = 'block_unit ' + getHPState(lossHP, maxHP) + getPlayerCursedState(line);
+
+                        getHPState(line, lossHP, maxHP);
+                        line.classList.add('cursed');
 
                         if (buffTime > 1 && unit.innerText !== 'died') {
                             line.setAttribute('curse_time', buffTime - 1);
                             setTimeout(run, 1000);
                             getStatus['ticking'](line);
+
+                            let notification = document.createElement('p');
+                            notification.className = 'text_mana';
+                            notification.classList.add('notification');
+                            notification.innerHTML = unitHP === 'died' ? 'Cмерть' :  '-'+value;
+
+                            line.append(notification);
+                            setNotification(notification);
                         } else {
                             line.classList.remove('cursed');
                             line.removeAttribute('curse_time');
                         }
+                    });
 
-                        line.className = 'block_unit ' + getHPState(lossHP, maxHP) + getPlayerCursedState(line);
-                    }, 1000);
+                    let notification = document.createElement('p');
+                    notification.className = 'text_mana';
+                    notification.classList.add('notification');
+                    notification.innerHTML = 'Заморожен!';
+
+                    line.append(notification);
+                    setNotification(notification);
 
                     line.setAttribute('curse_time', 5);
 
@@ -350,15 +475,24 @@ window.onload = function(){
             }
         }
 
-        setTimeout(() => {
-            removeCoolDown(panel);
-        }, 10000);
-
-        panel.className = 'panel_item';
+        removeCoolDown(panel, spellCoolDown);
+        refreshPlayerMP(playerMP, spellCost);
     }
 
-    function removeCoolDown(panel) {
-        panel.classList.add('active');
+    function refreshPlayerMP(mp, cost) {
+        let newMP = parseInt(mp) - parseInt(cost);
+        playerCurrMP.innerText = newMP;
+        player.state.MP = newMP;
+    }
+
+    function removeCoolDown(panel, cooldown) {
+        setTimeout(() => {
+            panel.classList.add('splash');
+            setTimeout(() => {
+                panel.classList.remove('splash');
+            }, 500);
+            panel.classList.add('active');
+        }, cooldown)
     }
 
     function checkCurseResist(block) {
@@ -366,13 +500,6 @@ window.onload = function(){
         return attr !== undefined ? Math.random() < attr / 100 : false;
     }
 
-    function getEnemyCursedState(block) {
-        return getCurseBuff(block) > 0 && block.querySelector('p').innerText !== 'died' ? ' cursed' : '';
-    }
-
-    function getPlayerCursedState(block) {
-        return getCurseBuff(block) > 0 && block.querySelector('p').innerText !== 'died' ? ' cursed' : '';
-    }
 
     function getCurseBuff(block) {
         let attr = block.getAttribute('curse_time');
@@ -385,17 +512,16 @@ window.onload = function(){
     }
 
     function unitSpells(data, panel) {
-        let spellName = data[1];
-        let spellValue = data[2];
-        let type = data[3];
+        let spellName = data.name;
+        let spellValue = data.value;
+        let spellCoolDown = data.coolDown;
+        let type = data.castOn;
         let army = document.querySelector('.main_block.'+type).querySelector('.block_line.army');
         let lines = army.querySelectorAll('.block_unit');
         let deadUnits = army.querySelectorAll('.block_unit.death');
         let fullHPUnits = army.querySelectorAll('.block_unit.fine');
-
-        if((data[0] === 'resurrectUnits') && deadUnits.length === 0) return alert('No one to resurrect');
-        if(data[0] === 'healUnits' && (fullHPUnits.length === lines.length || deadUnits.length === lines.length)) return alert('No one to heal');
-        if(data[0] === 'damageUnits' && deadUnits.length === lines.length) return alert('All units are already dead');
+        let spellCost = data.manaCost;
+        let playerMP = player.currMP();
 
         for(let line of lines) {
             let value = parseInt(spellValue);
@@ -415,102 +541,97 @@ window.onload = function(){
             let newHP = value;
             let currHP = parseInt(unitText);
 
-            let spellLog = document.createElement('p');
+            let notification = document.createElement('p');
+            notification.className = type === 'player' ? 'text_success' : 'text_special';
+            notification.classList.add('notification');
 
-            if (data[0] === 'healUnits' && unitText !== 'died') {
+
+            if (spellName === 'healUnits' && unitText !== 'died') {
                 newHP = parseInt(unitText) + value;
-                unitHP = getHPValue(newHP, maxHP);
+                if(!line.classList.contains('fine')) {
+                    unitHP = getHPValue(newHP, maxHP);
+                    getStatus['healed'](line);
 
-                spellLog.className = 'text_success';
-                spellLog.innerHTML = unitName + ' is healed by '+value;
+                    notification.innerHTML = '+'+value;
+
+                }
             }
 
-            if (data[0] === 'damageUnits' && unitText !== 'died') {
+            if (spellName === 'damageUnits' && unitText !== 'died') {
                 newHP = parseInt(unitText) - value;
                 unitHP = getHPValue(newHP, maxHP);
+                getStatus['magic'](line);
 
-                spellLog.className = 'text_special';
-                spellLog.innerHTML = 'You are deal '+value + ' damage';
+                notification.innerHTML = '-'+value;
             }
 
-            if (data[0] === 'resurrectUnits' && unitText === 'died') {
+            if (spellName === 'resurrectUnits' && unitText === 'died') {
                 unitHP = getHPValue(value, maxHP);
                 //startAutoAttack();
 
-                spellLog.className = 'text_success';
-                spellLog.innerHTML = unitName + ' was resurrected!';
+                notification.innerHTML = 'Воскрешен!';
             }
 
             unit.innerText = unitHP;
 
-            if ((data[0] === 'resurrectUnits' && unitText === 'died') || (data[0] === 'healUnits' && unitText !== 'died') && currHP < maxHP) {
-                line.className = 'block_unit '+ getHPState(newHP, maxHP) + getPlayerCursedState(line);
-                getStatus['healed'](line);
-                mainLogsContent.append(spellLog);
-                scrollToBottom(mainLogs);
-            }
+            if (unitText !== 'died')  {
+                getHPState(line, newHP, maxHP);
 
+                line.append(notification);
+                setNotification(notification);
 
-            if (data[0] === 'damageUnits' && unitText !== 'died')  {
-                line.className = 'block_unit '+ getHPState(newHP, maxHP) + getPlayerCursedState(line);
-                getStatus['magic'](line);
-                mainLogsContent.append(spellLog);
                 scrollToBottom(mainLogs);
             }
         }
 
-        panel.className = 'panel_item';
+        removeCoolDown(panel, spellCoolDown);
+        refreshPlayerMP(playerMP, spellCost);
 
-        setTimeout(() => {
-            removeCoolDown(panel);
-        }, 10000);
-    }
-
-    function getEnemyInfo() {
-        let enemyPanel = document.createElement('div');
-        enemyPanel.className = 'main_panel enemy';
-
-        //getUserInfo(enemyPanel, 'Enemy lvl 10', 20);
-
-        let enemySpells = document.createElement('div');
-        enemySpells.className = 'panel_skills';
-        enemyPanel.append(enemySpells);
-
-        panelItems([
-            ['healUnits', 'Heal', '20-50', 'enemy'],
-            ['curseUnits', 'Curse', '5-10', 'player'],
-            ['damageUnits', 'Damage', '10-50', 'player'],
-            ['resurrectUnits', 'Resurrection', 50, 'enemy'],
-        ], enemySpells);
-
-        //document.getElementById('main').prepend(enemyPanel);
+        //panel.className = 'panel_item';
+        //startPlayerCast(data, panel);
     }
 
     function getPlayerInfo(block) {
         let playerPanel = document.createElement('div');
         playerPanel.className = 'main_panel player';
 
-        let playerSpells = document.createElement('div');
-        playerSpells.className = 'panel_skills';
-        playerPanel.append(playerSpells);
+        let playerPanelSpells = document.createElement('div');
+        playerPanelSpells.className = 'panel_skills';
+        playerPanel.append(playerPanelSpells);
 
-        panelItems(spellBookList.spells(), playerSpells);
+        // console.log(playerSpells.spells()[0]);
+
+        panelItems(playerSpells.spells(), playerPanelSpells);
 
         block.append(playerPanel);
+
+        let playerCastBar = document.createElement('div');
+        playerCastBar.className = 'panel_cast_bar';
+
+        let playerCastBarContainer =  document.createElement('div');
+        playerCastBarContainer.className = 'panel_cast_container';
+        playerCastBarContainer.innerHTML = '<p><span>0.3</span> / 2.0</p>';
+
+        let playerCastBarProgress =  document.createElement('div');
+        playerCastBarProgress.className = 'panel_cast_transparent';
+
+        playerCastBarContainer.prepend(playerCastBarProgress);
+        playerCastBar.append(playerCastBarContainer);
+        playerPanel.append(playerCastBar);
     }
 
-    function getUserInfo(name, mana) {
+    function getUserInfo(player) {
         let playerInfo = document.createElement('div');
         playerInfo.className = 'main_hero';
 
         let heroName = document.createElement('div');
         heroName.className = 'hero_name';
-        heroName.innerHTML = '<p>' + name + '</p>';
+        heroName.innerHTML = '<p>' + player.title() + '</p>';
         playerInfo.append(heroName);
 
         let heroMana = document.createElement('div');
         heroMana.className = 'hero_mana';
-        heroMana.innerHTML = '<p>Mana: <span>' + mana + '</span>/' + mana + '</p>';
+        heroMana.innerHTML = '<p>Мана: <span>' + player.currMP() + '</span>/' + player.maxMP() + '</p>';
         playerInfo.append(heroMana);
 
         document.getElementById('content').append(playerInfo);
@@ -523,20 +644,22 @@ window.onload = function(){
     }
 
 
-    function getHPState (num, max) {
+    function getHPState (block, num, max) {
         num = parseInt(num);
+        let newState = 'death';
 
         if (num >= max) {
-            return 'fine';
+            newState =  'fine';
         } else if (num < max && getPercentage(num, max) > 50) {
-            return 'hurt';
+            newState = 'hurt';
         } else if(getPercentage(num, max) <= 50 && getPercentage(num, max) > 20) {
-            return 'caution';
+            newState = 'caution';
         } else if(getPercentage(num, max) <= 20  && getPercentage(num, max) > 0) {
-            return 'danger';
-        } else {
-            return 'death';
+            newState = 'danger';
         }
+
+        block.classList.remove('fine', 'hurt', 'caution', 'danger', 'death');
+        block.classList.add(newState);
     }
 
     function getHPValue (num, max) {
