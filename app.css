@@ -347,9 +347,10 @@ p.text_special {
 
 
 .block_unit.cursed {
-    box-shadow: 0 0 5px 1px #aa63f3, 0 0 5px 1px #aa63f3 inset;
+    /*box-shadow: 0 0 5px 1px #aa63f3, 0 0 5px 1px #aa63f3 inset;*/
     /*border-color: #c082ff;*/
     /*background: rgba(73, 2, 145, .2);*/
+    box-shadow: 0 0 5px 1px #029AAE, 0 0 5px 1px #029AAE inset;
 }
 
 .block_unit.cursed p,
@@ -385,7 +386,8 @@ p.text_special {
 
 .block_unit.resisted {
     /*border-color: #029AAE;*/
-    box-shadow: 0 0 5px 1px #029AAE, 0 0 5px 1px #029AAE inset;
+    /*box-shadow: 0 0 5px 1px #029AAE, 0 0 5px 1px #029AAE inset;*/
+    box-shadow: 0 0 5px 1px #aa63f3, 0 0 5px 1px #aa63f3 inset;
 }
 
 

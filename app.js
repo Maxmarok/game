@@ -47,8 +47,8 @@ window.onload = function(){
             this.state = {
                 list: [
                     ['healUnits', 'Heal 20-50', '20-50', 'player'],
-                    ['curseUnits', 'Curse 5-10', '5-10', 'enemy'],
-                    ['damageUnits', 'Damage 10-50', '10-50', 'enemy'],
+                    ['curseUnits', 'Freeze 5-10', '5-10', 'enemy'],
+                    ['damageUnits', 'Damage 10-30', '10-30', 'enemy'],
                     //['resurrectUnits', 'Resurrection', 50, 'player'],
                 ]
             }
@@ -321,10 +321,11 @@ window.onload = function(){
                 } else {
 
                     let maxHP = line.getAttribute('side') === 'player' ? player.maxHP() : dragon.maxHP();
-                    let lossHP = parseInt(unit.innerText) - value;
+
 
                     // Dot
                     setTimeout(function run() {
+                        let lossHP = parseInt(unit.innerText) - value;
                         let buffTime = getCurseBuff(line);
 
                         unitHP = getHPValue(lossHP, maxHP);
@@ -339,10 +340,12 @@ window.onload = function(){
                             line.classList.remove('cursed');
                             line.removeAttribute('curse_time');
                         }
+
+                        line.className = 'block_unit ' + getHPState(lossHP, maxHP) + getPlayerCursedState(line);
                     }, 1000);
 
                     line.setAttribute('curse_time', 5);
-                    line.className = 'block_unit ' + getHPState(lossHP, maxHP) + getPlayerCursedState(line);
+
                 }
             }
         }
