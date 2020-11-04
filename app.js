@@ -143,18 +143,20 @@ window.onload = function(){
         initiateAutoAttack('enemy', 'player');
     }, 1000);
 
-    setTimeout(function regenMP() {
-        let newMP = player.currMP() + player.regenMP();
-        let maxMP = player.maxMP();
+    function regenMP() {
+        setTimeout(() => {
+            let newMP = player.currMP() + player.regenMP();
+            let maxMP = player.maxMP();
 
-        newMP = newMP > maxMP ? maxMP : newMP;
-        playerCurrMP.innerText = newMP > maxMP ? maxMP : newMP;
-        player.state.MP = newMP;
+            newMP = newMP > maxMP ? maxMP : newMP;
+            playerCurrMP.innerText = newMP > maxMP ? maxMP : newMP;
+            player.state.MP = newMP;
 
-        if(player.currMP() < player.maxMP()) {
-            setTimeout(regenMP, 5000);
-        }
-    }, 5000);
+            if(player.currMP() < player.maxMP()) {
+                setTimeout(() => { regenMP()}, 5000);
+            }
+        }, 5000);
+    }
 
 
     function initiateAutoAttack(attacker, defender) {
@@ -391,98 +393,15 @@ window.onload = function(){
             unitSpells(data, panel, type);
         },
         curseUnits: function(data, panel, type) {
-            curseUnits(data, panel, type);
+            unitSpells(data, panel, type);
         }
-    }
-
-    function curseUnits(data, panel) {
-        let spellName = data.name;
-        let spellValue = data.value;
-        let spellCoolDown = data.coolDown;
-        let type = data.castOn;
-        let army = document.querySelector('.main_block.'+type).querySelector('.block_line.army');
-        let lines = army.querySelectorAll('.block_unit');
-        let deadUnits = army.querySelectorAll('.block_unit.death');
-        let spellCost = data.manaCost;
-        let playerMP = player.currMP();
-
-        if(spellName === 'curseUnits' && deadUnits.length === lines.length)  {
-            return alert('All units are already dead');
-        }
-
-        for(let line of lines) {
-            let value = parseInt(spellValue);
-
-            if (typeof spellValue === 'string') {
-                let arr = spellValue.split('-');
-                value = getRandomArbitrary(parseInt(arr[0]), parseInt(arr[1]));
-            }
-
-            let unit = line.querySelector('.unit_hp p');
-            let unitText = unit.innerText;
-
-            let unitHP = unitText;
-
-            if (spellName === 'curseUnits' && unitText !== 'died') {
-
-                if (checkCurseResist(line)) {
-                    getStatus['resisted'](line);
-
-                } else {
-
-                    let maxHP = line.getAttribute('side') === 'player' ? player.maxHP() : dragon.maxHP();
-
-                    // Dot
-                    setTimeout(function run() {
-                        let lossHP = parseInt(unit.innerText) - value;
-                        let buffTime = getCurseBuff(line);
-
-                        unitHP = getHPValue(lossHP, maxHP);
-                        unit.innerText = unitHP;
-
-                        getHPState(line, lossHP, maxHP);
-                        line.classList.add('cursed');
-
-                        if (buffTime > 1 && unit.innerText !== 'died') {
-                            line.setAttribute('curse_time', buffTime - 1);
-                            setTimeout(run, 1000);
-                            getStatus['ticking'](line);
-
-                            let notification = document.createElement('p');
-                            notification.className = 'text_mana';
-                            notification.classList.add('notification');
-                            notification.innerHTML = unitHP === 'died' ? 'Cмерть' :  '-'+value;
-
-                            line.append(notification);
-                            setNotification(notification);
-                        } else {
-                            line.classList.remove('cursed');
-                            line.removeAttribute('curse_time');
-                        }
-                    });
-
-                    let notification = document.createElement('p');
-                    notification.className = 'text_mana';
-                    notification.classList.add('notification');
-                    notification.innerHTML = 'Заморожен!';
-
-                    line.append(notification);
-                    setNotification(notification);
-
-                    line.setAttribute('curse_time', 5);
-
-                }
-            }
-        }
-
-        removeCoolDown(panel, spellCoolDown);
-        refreshPlayerMP(playerMP, spellCost);
     }
 
     function refreshPlayerMP(mp, cost) {
         let newMP = parseInt(mp) - parseInt(cost);
         playerCurrMP.innerText = newMP;
         player.state.MP = newMP;
+        if(player.currMP() < player.maxMP()) regenMP();
     }
 
     function removeCoolDown(panel, cooldown) {
@@ -572,6 +491,53 @@ window.onload = function(){
                 notification.innerHTML = 'Воскрешен!';
             }
 
+            if (spellName === 'curseUnits' && unitText !== 'died') {
+
+                if (checkCurseResist(line)) {
+                    getStatus['resisted'](line);
+
+                } else {
+
+                    let maxHP = line.getAttribute('side') === 'player' ? player.maxHP() : dragon.maxHP();
+
+                    // Dot
+                    setTimeout(function run() {
+                        newHP = parseInt(unit.innerText) - value;
+                        let buffTime = getCurseBuff(line);
+
+                        line.classList.add('cursed');
+
+                        if (buffTime > 1 && unit.innerText !== 'died') {
+                            line.setAttribute('curse_time', buffTime - 1);
+                            setTimeout(run, 1000);
+                            getStatus['ticking'](line);
+
+                            let notification = document.createElement('p');
+                            notification.className = 'text_mana';
+                            notification.classList.add('notification');
+                            notification.innerHTML = unitHP === 'died' ? 'Cмерть' :  '-'+value;
+
+                            line.append(notification);
+                            setNotification(notification);
+                        } else {
+                            line.classList.remove('cursed');
+                            line.removeAttribute('curse_time');
+                        }
+                    });
+
+                    let notification = document.createElement('p');
+                    notification.className = 'text_mana';
+                    notification.classList.add('notification');
+                    notification.innerHTML = 'Заморожен!';
+
+                    line.append(notification);
+                    setNotification(notification);
+
+                    line.setAttribute('curse_time', 5);
+
+                }
+            }
+
             unit.innerText = unitHP;
 
             if (unitText !== 'died')  {
@@ -579,8 +545,6 @@ window.onload = function(){
 
                 line.append(notification);
                 setNotification(notification);
-
-                scrollToBottom(mainLogs);
             }
         }
 
