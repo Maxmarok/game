@@ -113,11 +113,11 @@ window.onload = function(){
 
     let mainLogs = document.createElement('div');
     mainLogs.className = 'main_logs';
-    document.getElementById('main').append(mainLogs);
+    //document.getElementById('main').append(mainLogs);
 
     let mainLogsContent = document.createElement('div');
     mainLogsContent.className = 'main_logs_content';
-    mainLogs.append(mainLogsContent);
+    //mainLogs.append(mainLogsContent);
 
     let mainBanner = document.createElement('div');
     mainBanner.className = 'main_banner ready';
@@ -567,7 +567,7 @@ window.onload = function(){
 
         panelItems(playerSpells.spells(), playerPanelSpells);
 
-        block.append(playerPanel);
+        document.getElementById('main').append(playerPanel);
 
         let playerCastBar = document.createElement('div');
         playerCastBar.className = 'panel_cast_bar';

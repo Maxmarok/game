@@ -2,8 +2,8 @@
 
 body {
     display: flex;
-    background: #2b2b2b;
     height: 100vh;
+    background: #2b2b2b url("img/background.jpg") no-repeat center/cover;
 }
 
 p.text_danger {
@@ -34,6 +34,9 @@ p.text_mana {
     /*width: 100vw;*/
     /*height: 100vh;*/
     margin: auto;
+    padding: 20px;
+    border-radius: 15px;
+    background: #2b2b2b;
 }
 
 .main_content {
@@ -47,7 +50,7 @@ p.text_mana {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 150px;
+    width: 100%;
     height: 50px;
     margin-bottom: 10px;
     border: 3px solid black;
@@ -75,6 +78,7 @@ p.text_mana {
 }
 
 .main_hero {
+    display: none;
     margin-left: 10px;
     /*width: 150px;*/
     text-align: center;
@@ -82,12 +86,12 @@ p.text_mana {
 
 .main_block {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+        /*justify-content: center;*/
+    align-items: center;
     /*width: calc(100% - 56px);*/
     width: 700px;
-    height: 200px;
+    height: 300px;
     /*height: calc(35% - 6px);*/
     padding: 0 25px;
     margin: -3px auto;
@@ -97,7 +101,6 @@ p.text_mana {
 }
 
 .main_block.player {
-    align-items: flex-end;
     border-top: 0;
     border-radius: 0 0 15px 15px;
 }
@@ -105,10 +108,6 @@ p.text_mana {
 .main_block.enemy {
     border-bottom: 0;
     border-radius: 15px 15px 0 0;
-}
-
-.main_army {
-    transition: 1s;
 }
 
 .main_block.player .main_army {
@@ -122,13 +121,13 @@ p.text_mana {
 }
 
 .main.fight .main_block.player .main_army {
-    margin-bottom: 50px;
+    margin-bottom: auto;
     margin-top: 0;
 }
 
 .main.fight .main_block.enemy .main_army {
     margin-bottom: 0;
-    margin-top: 50px;
+    margin-top: auto;
 }
 
 .main_panel {
@@ -138,7 +137,7 @@ p.text_mana {
 }
 
 .main_panel.player {
-    margin: auto;
+    margin: 10px auto;
 }
 
 .main_panel.enemy {
@@ -147,10 +146,11 @@ p.text_mana {
 
 .main_army {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     max-width: 50%;
+    transition: 1s;
 }
 
 .block_line {
@@ -182,7 +182,7 @@ p.text_mana {
 
 .panel_skills {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 }
 
 .panel_item {
