@@ -17,7 +17,11 @@
                 <div class="main_block enemy">
                     <div class="main_army">
                         <div class="block_line army">
-                            <div class="block_unit fine" name="Дракон" resist="0" attack="30-40" armor="100" speed="3000" side="enemy">
+                            <div class="block_unit fine" hp="1000" name="Дракон" resist="0" attack="40-60" armor="70" speed="3000" side="enemy">
+                                <div class="unit_auto_attack">
+                                    <div class="unit_auto_attack_fill"></div>
+                                </div>
+
                                 <div class="unit_description">
                                     <p>Дракон</p>
                                 </div>
@@ -39,7 +43,11 @@
                 <div class="main_block player">
                     <div class="main_army player">
                         <div class="block_line army">
-                            <div class="block_unit fine" name="Рыцарь" resist="20" attack="15-25" armor="70" speed="2500" side="player">
+                            <div class="block_unit fine" hp="100" name="Рыцарь" resist="20" attack="10-20" armor="50" speed="2500" side="player">
+                                <div class="unit_auto_attack">
+                                    <div class="unit_auto_attack_fill"></div>
+                                </div>
+
                                 <div class="unit_description">
                                     <p>Рыцарь</p>
                                 </div>
@@ -57,7 +65,11 @@
                                 </div>
                             </div>
 
-                            <div class="block_unit fine" name="Воин" resist="20" attack="15-20" armor="70" speed="2000" side="player">
+                            <div class="block_unit fine" hp="100" name="Воин" resist="20" attack="15-30" armor="20" speed="2000" side="player">
+                                <div class="unit_auto_attack">
+                                    <div class="unit_auto_attack_fill"></div>
+                                </div>
+
                                 <div class="unit_description">
                                     <p>Воин</p>
                                 </div>
@@ -76,19 +88,19 @@
                         </div>
 
                         <div class="block_line army">
-                            <div class="block_unit fine" name="Манашторм" resist="20" attack="15-25" armor="70" speed="2500" side="player">
+                            <div class="block_unit fine" name="Игрок" resist="20" attack="15-25" armor="70" speed="2500" side="player">
                                 <div class="unit_description">
-                                    <p>Маг</p>
+                                    <p>Игрок</p>
                                 </div>
 
                                 <div class="unit_avatar" style="background-image:url('img/wizard.svg'); background-position: 20px;"></div>
 
-                                <div class="unit_hp">
-                                    <div class="unit_hp_value">
-                                        <p>200/200</p>
+                                <div class="unit_mana">
+                                    <div class="unit_mana_value">
+                                        <p>1000/1000</p>
                                     </div>
-                                    <div class="unit_hp_bar">
-                                        <div class="unit_hp_bar_fill"></div>
+                                    <div class="unit_mana_bar">
+                                        <div class="unit_mana_bar_fill"></div>
                                     </div>
                                 </div>
                             </div>

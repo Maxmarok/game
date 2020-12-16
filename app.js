@@ -3,20 +3,20 @@ window.onload = function(){
     class Player {
         constructor() {
             this.state = {
-                name: 'Манашторм',
+                name: 'Игрок',
                 level: 2,
 
-                MP: 200,
-                maxMP: 200,
+                MP: 1000,
+                maxMP: 1000,
 
                 HP: 100,
                 maxHP: 100,
-                MP5: 10,
+                MP5: 50,
             };
         }
 
         name() {
-            return this.state.name;
+            return this.state.name
         }
 
         title() {
@@ -72,11 +72,12 @@ window.onload = function(){
                         manaCost: 10,
                         castTime: 2000,
                         coolDown: 5000,
+                        colorCast: 'healed'
                     },
 
                     {
                         name: 'curseUnits',
-                        title: 'Заморозка.',
+                        title: 'Заморозка',
                         level: 2,
                         value: '5-10',
                         castOn: 'enemy',
@@ -84,17 +85,19 @@ window.onload = function(){
                         castTime: 1000,
                         coolDown: 10000,
                         duration: 5000,
+                        colorCast: 'cursed',
                     },
 
                     {
                         name: 'damageUnits',
                         title: 'Метеор',
                         level: 1,
-                        value: '10-30',
+                        value: '50-75',
                         castOn: 'enemy',
-                        manaCost: 10,
-                        castTime: 2000,
+                        manaCost: 50,
+                        castTime: 3000,
                         coolDown: 5000,
+                        colorCast: 'damaging'
                     },
                 ]
             }
@@ -111,6 +114,34 @@ window.onload = function(){
 
     setCookie('user_level', player.state.level);
 
+    let startGame = function () {
+        mainBannerText.removeEventListener('click', startGame);
+        mainBannerText.innerText = 'Приготовьтесь...';
+        setTimeout(() => {
+            mainBanner.classList.remove('ready')
+            mainBanner.classList.add('go');
+            mainBannerText.innerText = 'Сражение началось!';
+
+            let spells = document.querySelectorAll('.panel_item');
+
+            spells.forEach(e => {
+                e.classList.add('splash');
+                e.classList.add('active');
+            });
+
+            setTimeout(() => {
+                spells.forEach(e => {
+                    e.classList.remove('splash');
+                });
+            }, 500);
+
+            document.getElementById('main').classList.add('fight');
+
+            initiateAutoAttack('player', 'enemy');
+            initiateAutoAttack('enemy', 'player');
+        }, 1000);
+    }
+
     let mainLogs = document.createElement('div');
     mainLogs.className = 'main_logs';
     //document.getElementById('main').append(mainLogs);
@@ -123,7 +154,8 @@ window.onload = function(){
     mainBanner.className = 'main_banner ready';
 
     let mainBannerText = document.createElement('p');
-    mainBannerText.innerText = 'Ready to Battle!';
+    mainBannerText.innerText = 'Нажмите, чтобы начать бой';
+    mainBannerText.addEventListener('click', startGame);
     mainBanner.append(mainBannerText);
 
     document.getElementById('main').prepend(mainBanner);
@@ -132,16 +164,7 @@ window.onload = function(){
 
     let playerCurrMP = document.querySelector('.hero_mana span');
 
-    setTimeout(() => {
-        mainBanner.classList.remove('ready')
-        mainBanner.classList.add('go');
-        mainBannerText.innerText = 'Сражение началось!';
 
-        document.getElementById('main').classList.add('fight');
-
-        initiateAutoAttack('player', 'enemy');
-        initiateAutoAttack('enemy', 'player');
-    }, 1000);
 
     function regenMP() {
         setTimeout(() => {
@@ -170,7 +193,6 @@ window.onload = function(){
             let unitName = armyUnit.getAttribute('name');
             let unitSide = armyUnit.getAttribute('side');
 
-
             let enemyUnit = enemyUnits[unitPos];
             if (enemyUnits.length === 1) enemyUnit = enemyUnits[0];
 
@@ -178,9 +200,26 @@ window.onload = function(){
 
             let start = setTimeout(function autoAttack() {
 
+                let autoAttackBar = armyUnit.querySelector('.unit_auto_attack_fill');
+                autoAttackBar.style.width = '0%';
+
+
                 if (armyUnit.querySelector('.unit_hp p').innerText === 'died' || deadEnemyUnits === enemyUnits.length) {
+
                     clearTimeout(start);
                 } else {
+                    let autoAttackSpeed = 100;
+                    autoAttackBar.style.width = '0%';
+
+                    let autoAttackTime = () => {
+                        setTimeout(() => {
+                            autoAttackSpeed = autoAttackSpeed + 10;
+                            autoAttackBar.style.width = (autoAttackSpeed * 100 / speed) + '%';
+                            if(speed >= autoAttackSpeed) autoAttackTime();
+                        }, 10);
+                    }
+
+                    autoAttackTime();
                     setTimeout(autoAttack, speed);
                 }
 
@@ -200,17 +239,15 @@ window.onload = function(){
                     let attackValue = value;
 
                     if (enemyArmor > 0) {
-                        attackValue = Math.floor(value - enemyArmor / 100);
-                        let difference = enemyArmor - attackValue ;
-                        if (difference <= 0) {
-                            enemyArmor = 0
-                        } else {
-                            enemyArmor = difference;
-                        }
-                        enemyUnit.setAttribute('armor', enemyArmor);
+
+                        attackValue = Math.floor(value - value/100*enemyArmor);
+                        console.log(enemyName +': броня - '+enemyArmor+'%, атака: '+attackValue);
+                        let difference = enemyArmor - Math.floor(getPercentage(attackValue, enemyArmor));
+                        difference <= 0 ? enemyArmor = 0 : enemyArmor = difference;
+                        //enemyUnit.setAttribute('armor', enemyArmor);
                     }
 
-                    let maxHP = enemySide === 'player' ? player.maxHP() : dragon.maxHP();
+                    let maxHP = enemyUnit.getAttribute('hp');
 
                     let lossHP = parseInt(enemy.innerText) - attackValue;
 
@@ -323,7 +360,7 @@ window.onload = function(){
             let spellInfo = data;
 
             let item = document.createElement('div');
-            item.className = 'panel_item active ' + spellInfo.name;
+            item.className = 'panel_item ' + spellInfo.name;
             item.addEventListener('click', () => applySpell(spellInfo, item));
 
             let title = document.createElement('div');
@@ -335,19 +372,20 @@ window.onload = function(){
 
             let cost = document.createElement('div');
             cost.className = 'panel_hint cost';
-            cost.innerHTML = '<p class="text_mana">' + spellInfo.manaCost + ' М</p>';
+            cost.innerHTML = '<p class="text_mana">' + spellInfo.manaCost + '</p>';
 
             let time = document.createElement('div');
             time.className = 'panel_hint time';
-            time.innerHTML = '<p>' + spellInfo.castTime / 1000 + 's</p>';
+            time.innerHTML = '<p>' + (spellInfo.castTime / 1000).toFixed(1) + '</p>';
 
             let coolDown = document.createElement('div');
             coolDown.className = 'panel_hint cooldown';
-            coolDown.innerHTML = '<p>' + spellInfo.coolDown / 1000 + 's</p>';
+            coolDown.innerHTML = '<p>' + (spellInfo.coolDown / 1000).toFixed(1) + '</p>';
 
             desc.append(cost);
-            desc.append(time);
             desc.append(coolDown);
+            desc.append(time);
+
 
             item.append(title);
             item.append(desc);
@@ -367,7 +405,7 @@ window.onload = function(){
                 startPlayerCast(spell, block);
             }
         } else {
-            alert('Spell ' +spell.title+ ' isn\'t ready yet');
+            //alert('Spell ' +spell.title+ ' isn\'t ready yet');
         }
     }
 
@@ -375,9 +413,39 @@ window.onload = function(){
         let castBar = document.querySelector('.panel_cast_bar');
         castBar.classList.add('active');
 
+        let castTime = spell.castTime;
+        let colorCast = spell.colorCast;
+        let castTimeCurr = document.querySelector('.cast_time_curr');
+        let castTimeAll = document.querySelector('.cast_time_all');
+        let castTimeContainer = document.querySelector('.panel_cast_fill');
+        let panelCastBar = document.querySelector('.panel_cast_bar');
+
+        castTimeAll.text = castTime;
+        castTimeAll.innerHTML = (castTime / 1000).toFixed(1);
+        castTimeCurr.text = 0;
+        castTimeContainer.style.transition = '0%';
+
+        panelCastBar.classList.add(colorCast);
+
+        let countCastTime = () => {
+            castTimeContainer.style.width = (castTimeCurr.text * 100 / castTimeAll.text) + '%';
+            setTimeout(() => {
+                if (castTimeAll.text > castTimeCurr.text) {
+                    castTimeCurr.text = castTimeCurr.text + 100;
+                    castTimeCurr.innerHTML = (castTimeCurr.text / 1000).toFixed(1);
+                    countCastTime();
+                } else {
+                    panelCastBar.classList.remove(colorCast);
+                    castTimeContainer.style.width = '0%';
+                    castBar.classList.remove('active');
+                }
+            }, 100);
+        }
+
+        countCastTime();
+
         setTimeout(() => {
             panel.classList.remove('active'); //set coolDown
-            castBar.classList.remove('active');
             spellBook[spell.name](spell, panel); //apply spell
         }, spell.castTime);
     }
@@ -456,7 +524,7 @@ window.onload = function(){
 
             let unitHP = unitText;
 
-            let maxHP = line.getAttribute('side') === 'player' ? player.maxHP() : dragon.maxHP();
+            let maxHP = line.getAttribute('hp') ;
             let newHP = value;
             let currHP = parseInt(unitText);
 
@@ -472,11 +540,11 @@ window.onload = function(){
                     getStatus['healed'](line);
 
                     notification.innerHTML = '+'+value;
-
                 }
             }
 
             if (spellName === 'damageUnits' && unitText !== 'died') {
+                if (getCurseBuff(line) !== 0) value = value + 50;
                 newHP = parseInt(unitText) - value;
                 unitHP = getHPValue(newHP, maxHP);
                 getStatus['magic'](line);
@@ -498,16 +566,15 @@ window.onload = function(){
 
                 } else {
 
-                    let maxHP = line.getAttribute('side') === 'player' ? player.maxHP() : dragon.maxHP();
 
                     // Dot
                     setTimeout(function run() {
-                        newHP = parseInt(unit.innerText) - value;
-                        let buffTime = getCurseBuff(line);
 
+                        let buffTime = getCurseBuff(line);
                         line.classList.add('cursed');
 
-                        if (buffTime > 1 && unit.innerText !== 'died') {
+                        if (buffTime > 0 && unit.innerText !== 'died') {
+                            newHP = parseInt(unit.innerText) - value;
                             line.setAttribute('curse_time', buffTime - 1);
                             setTimeout(run, 1000);
                             getStatus['ticking'](line);
@@ -519,6 +586,10 @@ window.onload = function(){
 
                             line.append(notification);
                             setNotification(notification);
+
+                            getHPState(line, newHP, maxHP);
+                            unitHP = getHPValue(newHP, maxHP);
+                            unit.innerText = unitHP;
                         } else {
                             line.classList.remove('cursed');
                             line.removeAttribute('curse_time');
@@ -534,7 +605,6 @@ window.onload = function(){
                     setNotification(notification);
 
                     line.setAttribute('curse_time', 5);
-
                 }
             }
 
@@ -542,7 +612,6 @@ window.onload = function(){
 
             if (unitText !== 'died')  {
                 getHPState(line, newHP, maxHP);
-
                 line.append(notification);
                 setNotification(notification);
             }
@@ -574,11 +643,15 @@ window.onload = function(){
 
         let playerCastBarContainer =  document.createElement('div');
         playerCastBarContainer.className = 'panel_cast_container';
-        playerCastBarContainer.innerHTML = '<p><span>0.3</span> / 2.0</p>';
+        playerCastBarContainer.innerHTML = '<p><span class="cast_time_curr">0.3</span> / <span class="cast_time_all">2.0</span></p>';
 
         let playerCastBarProgress =  document.createElement('div');
         playerCastBarProgress.className = 'panel_cast_transparent';
 
+        let playerCastBarFill =  document.createElement('div');
+        playerCastBarFill.className = 'panel_cast_fill';
+
+        playerCastBarProgress.append(playerCastBarFill);
         playerCastBarContainer.prepend(playerCastBarProgress);
         playerCastBar.append(playerCastBarContainer);
         playerPanel.append(playerCastBar);

@@ -3,7 +3,8 @@
 body {
     display: flex;
     height: 100vh;
-    background: #2b2b2b url("img/background.jpg") no-repeat center/cover;
+    background: #2b2b2b;
+
 }
 
 p.text_danger {
@@ -239,9 +240,7 @@ p.text_mana {
     transition: 1s;
 }
 
-
-
-.panel_item.healUnits .panel_title {
+.panel_cast_bar.healed, .panel_item.healUnits .panel_title {
     background-image: url("img/holy-star.svg");
 }
 
@@ -249,7 +248,11 @@ p.text_mana {
     color: #fcf8b7;
 }
 
-.panel_item.curseUnits .panel_title {
+.panel_cast_bar.healed .panel_cast_fill {
+    background: #a7a450;
+}
+
+.panel_cast_bar.cursed, .panel_item.curseUnits .panel_title {
     background-position: left -1px;
     background-image: url("img/snowflake.svg");
 }
@@ -258,13 +261,22 @@ p.text_mana {
     color: #04b6cd;
 }
 
-.panel_item.damageUnits .panel_title {
+.panel_cast_bar.cursed .panel_cast_fill {
+    background: #028ea0;
+}
+
+
+.panel_cast_bar.damaging, .panel_item.damageUnits .panel_title {
     background-position: 2px -1px;
     background-image: url("img/meteor.svg");
 }
 
 .panel_item.damageUnits .panel_title p {
     color: #CF4D11;
+}
+
+.panel_cast_bar.damaging .panel_cast_fill {
+    background: #b33f0a;
 }
 
 .panel_description {
@@ -286,7 +298,7 @@ p.text_mana {
 }
 
 .panel_hint.cost {
-    width: calc(45% - 20px);
+    /*width: calc(45% - 20px);*/
     background-image: url("img/mana.svg");
 }
 
@@ -347,6 +359,13 @@ p.text_mana {
     left: 0;
     /* border-radius: 15px; */
     background: #666;
+}
+
+.panel_cast_fill {
+    width: 0;
+    height: 20px;
+    background: #358EFF;
+    transition: width .2s, background .3s;
 }
 
 .block_unit {
@@ -452,6 +471,20 @@ p.text_mana {
     /*font-size: 12px;*/
 }
 
+.unit_auto_attack {
+    width: 100%;
+    height: 3px;
+    background: #666;
+    margin-bottom: 8px;
+    border: .5px solid #aaa;
+}
+
+.unit_auto_attack_fill {
+    width: 0;
+    height: 100%;
+    background: #ddd;
+}
+
 .block_unit.black {
     box-shadow: 0 0 5px 1px #fff, 0 0 5px 1px #fff inset;
 
@@ -469,20 +502,19 @@ p.text_mana {
     /*box-shadow: 0 0 5px 1px green, 0 0 5px 1px green inset;*/
 
 }
-.block_unit.fine > div p,
-.block_unit.fine > div span {
+.block_unit.fine .unit_hp_value p,
+.block_unit.fine .unit_description p {
     color: #0ab50a;
 }
-
-
 
 .block_unit.hurt {
     border-color: #4b8000;
     /*background: rgba(0, 128, 0, .2);*/
 
 }
-.block_unit.hurt > div p,
-.block_unit.hurt > div span {
+
+.block_unit.hurt .unit_hp_value p,
+.block_unit.hurt .unit_description p{
     color: rgb(113, 188, 8);
 }
 
@@ -491,8 +523,8 @@ p.text_mana {
     border-color: rgb(164, 164, 6);
     /*background: rgba(164, 164, 6, .2);*/
 }
-.block_unit.caution > div p,
-.block_unit.caution > div span {
+.block_unit.caution .unit_hp_value p,
+.block_unit.caution .unit_description p {
     color: rgb(212, 212, 20);
 }
 
@@ -504,18 +536,22 @@ p.text_mana {
     box-shadow: 0 0 5px 1px #029AAE, 0 0 5px 1px #029AAE inset;
 }
 
-.block_unit.cursed > div p,
-.block_unit.cursed > div span {
+.block_unit.cursed .unit_hp_value p,
+.block_unit.cursed .unit_description p {
     /*color: #c082ff;*/
+}
+
+.block_unit .unit_mana_value p {
+    color: #029AAE;
 }
 
 .block_unit.damaging {
     /*border-color: rgb(207, 77, 17);*/
     background: rgba(164, 56, 6, .2);
 }
-.block_unit.damaging > div p,
-.block_unit.damaging > div span {
-    /*color: rgb(207, 77, 17);*/
+.block_unit.damaging .unit_hp_value p,
+.block_unit.damaging .unit_description p {
+    color: rgb(207, 77, 17);
 }
 
 .block_unit.magic {
@@ -530,8 +566,8 @@ p.text_mana {
     background: rgba(255,255,255, .5);
 }
 
-.block_unit.healed > div p,
-.block_unit.healed > div span {
+.block_unit.healed .unit_hp_value p,
+.block_unit.healed .unit_description p {
     color: #fcf8b7;
 }
 
@@ -549,8 +585,8 @@ p.text_mana {
     animation: dangerBlinks .5s infinite;
 
 }
-.block_unit.danger > div p,
-.block_unit.danger > div span {
+.block_unit.danger .unit_hp_value p,
+.block_unit.danger .unit_description p {
     color: rgb(207, 77, 17);
 }
 
@@ -559,8 +595,9 @@ p.text_mana {
     border-color: rgb(176, 15, 15);
     /*background: rgba(145, 13, 13, .2);*/
 }
-.block_unit.death > div p,
-.block_unit.death > div span {
+
+.block_unit.death .unit_hp_value p,
+.block_unit.death .unit_description p {
     color: rgb(176, 15, 15);
 }
 
