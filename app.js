@@ -1,5 +1,5 @@
+'use strict';
 window.onload = function(){
-
     class Player {
         constructor() {
             this.state = {
@@ -114,7 +114,7 @@ window.onload = function(){
 
     setCookie('user_level', player.state.level);
 
-    let startGame = function () {
+    function startGame() {
         mainBannerText.removeEventListener('click', startGame);
         mainBannerText.innerText = 'Приготовьтесь...';
         setTimeout(() => {
@@ -181,7 +181,6 @@ window.onload = function(){
         }, 5000);
     }
 
-
     function initiateAutoAttack(attacker, defender) {
         startAutoAttack(getUnits(attacker), getUnits(defender));
     }
@@ -201,24 +200,21 @@ window.onload = function(){
             let start = setTimeout(function autoAttack() {
 
                 let autoAttackBar = armyUnit.querySelector('.unit_auto_attack_fill');
+                let autoAttackSpeed = 100;
                 autoAttackBar.style.width = '0%';
 
+                let autoAttackTime = () => {
+                    setTimeout(() => {
+                        autoAttackSpeed = autoAttackSpeed + 10;
+                        autoAttackBar.style.width = (autoAttackSpeed * 100 / speed) + '%';
+                        if(speed > autoAttackSpeed) autoAttackTime();
+                    }, 10);
+                }
 
                 if (armyUnit.querySelector('.unit_hp p').innerText === 'died' || deadEnemyUnits === enemyUnits.length) {
-
-                    clearTimeout(start);
-                } else {
-                    let autoAttackSpeed = 100;
+                    clearTimeout(autoAttackTime);
                     autoAttackBar.style.width = '0%';
-
-                    let autoAttackTime = () => {
-                        setTimeout(() => {
-                            autoAttackSpeed = autoAttackSpeed + 10;
-                            autoAttackBar.style.width = (autoAttackSpeed * 100 / speed) + '%';
-                            if(speed >= autoAttackSpeed) autoAttackTime();
-                        }, 10);
-                    }
-
+                } else {
                     autoAttackTime();
                     setTimeout(autoAttack, speed);
                 }
@@ -267,7 +263,7 @@ window.onload = function(){
                     let notification = document.createElement('p');
                     notification.className = unitSide === 'player' ? 'text_warn' : 'text_danger';
                     notification.classList.add('notification');
-                    notification.innerHTML = enemyHP === 'died' ? 'Cмерть' :  '-'+attackValue;
+                    notification.innerHTML = enemyHP === 'died' ? 'Cмерть' :  '-'+attackValue+ ' Атака';
 
                     enemyUnit.append(notification);
                     setNotification(notification);
@@ -281,7 +277,7 @@ window.onload = function(){
         let randomStart = getRandomArbitrary(0,60)+'px';
 
         block.animate([
-            { transform: 'translate('+randomStart+', -10px) scale(2)', opacity: '1' },
+            { transform: 'translate('+randomStart+', -10px) scale(1.5)', opacity: '1' },
             { transform: 'translate('+randomEnd+', -50px) scale(1)', opacity: '.5' }
         ], {
             duration: 2000
@@ -432,7 +428,7 @@ window.onload = function(){
             setTimeout(() => {
                 if (castTimeAll.text > castTimeCurr.text) {
                     castTimeCurr.text = castTimeCurr.text + 100;
-                    castTimeCurr.innerHTML = (castTimeCurr.text / 1000).toFixed(1);
+                    castTimeCurr.innerHTML = (castTimeCurr.text / 100).toFixed(1);
                     countCastTime();
                 } else {
                     panelCastBar.classList.remove(colorCast);
@@ -500,6 +496,7 @@ window.onload = function(){
 
     function unitSpells(data, panel) {
         let spellName = data.name;
+        let spellTitle = data.title;
         let spellValue = data.value;
         let spellCoolDown = data.coolDown;
         let type = data.castOn;
@@ -539,7 +536,7 @@ window.onload = function(){
                     unitHP = getHPValue(newHP, maxHP);
                     getStatus['healed'](line);
 
-                    notification.innerHTML = '+'+value;
+                    notification.innerHTML = '+'+value+' ('+spellTitle+')';
                 }
             }
 
@@ -549,7 +546,7 @@ window.onload = function(){
                 unitHP = getHPValue(newHP, maxHP);
                 getStatus['magic'](line);
 
-                notification.innerHTML = '-'+value;
+                notification.innerHTML = '-'+value+' ('+spellTitle+')';
             }
 
             if (spellName === 'resurrectUnits' && unitText === 'died') {
@@ -582,7 +579,7 @@ window.onload = function(){
                             let notification = document.createElement('p');
                             notification.className = 'text_mana';
                             notification.classList.add('notification');
-                            notification.innerHTML = unitHP === 'died' ? 'Cмерть' :  '-'+value;
+                            notification.innerHTML = unitHP === 'died' ? 'Cмерть' :  '-'+value+' ('+spellTitle+')';
 
                             line.append(notification);
                             setNotification(notification);
