@@ -212,7 +212,7 @@ window.onload = function(){
                 }
 
                 if (armyUnit.querySelector('.unit_hp p').innerText === 'died' || deadEnemyUnits === enemyUnits.length) {
-                    clearTimeout(autoAttackTime);
+                    clearTimeout(autoAttackTime());
                     autoAttackBar.style.width = '0%';
                 } else {
                     autoAttackTime();
@@ -335,8 +335,6 @@ window.onload = function(){
             }, 500);
         },
 
-
-
         resisted: function(block) {
             block.classList.add('resisted');
             setTimeout(() => {
@@ -372,11 +370,11 @@ window.onload = function(){
 
             let time = document.createElement('div');
             time.className = 'panel_hint time';
-            time.innerHTML = '<p>' + (spellInfo.castTime / 1000).toFixed(1) + '</p>';
+            time.innerHTML = '<p>' + (spellInfo.castTime / 1000).toFixed(0) + 'c</p>';
 
             let coolDown = document.createElement('div');
             coolDown.className = 'panel_hint cooldown';
-            coolDown.innerHTML = '<p>' + (spellInfo.coolDown / 1000).toFixed(1) + '</p>';
+            coolDown.innerHTML = '<p>' + (spellInfo.coolDown / 1000).toFixed(0) + 'с</p>';
 
             desc.append(cost);
             desc.append(coolDown);
@@ -417,7 +415,7 @@ window.onload = function(){
         let panelCastBar = document.querySelector('.panel_cast_bar');
 
         castTimeAll.text = castTime;
-        castTimeAll.innerHTML = (castTime / 1000).toFixed(1);
+        castTimeAll.innerHTML = (castTime / 1000).toFixed(0) + 'c';
         castTimeCurr.text = 0;
         castTimeContainer.style.transition = '0%';
 
@@ -427,15 +425,15 @@ window.onload = function(){
             castTimeContainer.style.width = (castTimeCurr.text * 100 / castTimeAll.text) + '%';
             setTimeout(() => {
                 if (castTimeAll.text > castTimeCurr.text) {
-                    castTimeCurr.text = castTimeCurr.text + 100;
-                    castTimeCurr.innerHTML = (castTimeCurr.text / 100).toFixed(1);
+                    castTimeCurr.text = castTimeCurr.text + 10;
+                    castTimeCurr.innerHTML = (castTimeCurr.text / 1000).toFixed(1) + 'c';
                     countCastTime();
                 } else {
                     panelCastBar.classList.remove(colorCast);
                     castTimeContainer.style.width = '0%';
                     castBar.classList.remove('active');
                 }
-            }, 100);
+            }, 10);
         }
 
         countCastTime();
